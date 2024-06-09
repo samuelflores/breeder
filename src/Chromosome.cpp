@@ -367,7 +367,7 @@
 		testFileStream.close();
 
                 //mmbCopyFile(mysqlConnection.getRenumberedWildTypeStructureFileName(),string(singleMutantDirectory + "/raw.pdb"));
-                copyFile(mysqlConnection.getRenumberedWildTypeStructureFileName(),string(singleMutantDirectory + "/raw.pdb"));
+                mmbCopyFile(mysqlConnection.getRenumberedWildTypeStructureFileName(),string(singleMutantDirectory + "/raw.pdb"));
                
 
                 if (!computeIndividualWildType) {
