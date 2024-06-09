@@ -1,0 +1,6 @@
+[mysql]
+password=mMBc9IU5@r
+host=localhost
+user=mmbcgi  
+database=mmb
+#-h rembrandt.bmc.uu.se -u mmbadmin -D mmb

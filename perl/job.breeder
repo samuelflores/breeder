@@ -1,0 +1,6 @@
+#!/bin/bash -l
+#SBATCH -J FNKEQDNAFYEILHLPNLNEEQRHGFIPSLKDDPSQSANQLAE
+#SBATCH -p core
+#SBATCH -t 48:00:00
+#SBATCH -A s00112-240
+./breeder -ID /bubo/home/h17/samuelf/glob/projects/protein-A/13APR13

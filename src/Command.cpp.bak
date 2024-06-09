@@ -1,0 +1,9 @@
+#include "Command.h"
+
+void Command::setParametersFromMysql() {
+
+};
+
+void Command::writeCommandFile() {
+
+};	

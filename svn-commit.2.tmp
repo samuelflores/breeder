@@ -1,0 +1,11 @@
+
+--This line, and those below, will be ignored--
+
+M    README
+M    include/BreederParameterReader.h
+M    include/Chromosome.h
+M    include/DBManager.h
+M    src/Breed.cpp
+M    src/BreederParameterReader.cpp
+M    src/Chromosome.cpp
+M    src/DBManager.cpp
