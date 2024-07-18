@@ -211,13 +211,16 @@ This result has been added to the synopsis table. If the calculation has been do
                 }
                   
                 // We CD to the mutant directory before submitting the job. This is because the environment, including current directory, is copied to the session. That way we will get the slurm output in the mutant directory
-		std::string submitJobString = //"sudo date  --set=\'20170728 1518\' ";
-                    ////std::string("cd ") + std::string(singleMutantDirectory) + std::string("; ")
-                    //std::string("chmod 777 ") + jobFileName + "; " 
+		std::string submitJobString = "";
+	        #ifdef SLURM	
+		submitJobString = //"sudo date  --set=\'20170728 1518\' ";
                     //// Decided for a web server it's best not to separately queue foldx jobs. These run pretty fast now anyway, so we can do it this way even for desktop use. 
                     // Changed my mind, because now am encountering "Caught Killed" errors which I cannot understand or fix. I moved the sendemail command to the job file to ensure it is sent after the job is done and not before.
                     //+ jobFileName;
-                    std::string("sbatch ") + jobFileName;
+                    std::string("sbatch ") + jobFileName; // prepend "sbatch", run in slurm.
+		#else
+		submitJobString= std::string("") + jobFileName; // prepend nothing, just run in foreground.
+		#endif
                 int systemCallReturnValue = -11111;
                 std::cout<<__FILE__<<":"<<__LINE__<<" issuing system call : >"<<submitJobString<<"< "<<std::endl; 
 		systemCallReturnValue = system(submitJobString.c_str());	
