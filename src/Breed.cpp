@@ -196,9 +196,11 @@ Thank you for using the homologyScanner web server. Your contribution not only p
 If you are getting this message, the the effect of the  mutation you specified has been computed on a single PDB structure as named above. There may still be other PDB structures queued, and if so you will receive another email soon.\n\n\
 \
 This result has been added to the synopsis table. If the calculation has been done on any other homologs, these are available there as well. If there are any homologs still in the queue, their results will be added to the table when those are completed. The link to the table was sent to you in a prior email. You can also view the results in the structure viewer (click the View tab on biodesign.scilifelab.se , and select the values from the drop down lists.).\n\n Bye" ;
-
-               jobFile <<"printf \"" <<leafJobCompleteEmailContents <<"\" | "<<" /usr/bin/mail -s \"Update: results computed for PDB ID: "<< mysqlConnection.getPdbId()<< "\" "<< mysqlConnection.emailAddress << ",samuelfloresc@gmail.com";
-               //jobFile <<"/usr/bin/sendemail -m \"" + leafJobCompleteEmailContents + "\"  -u \"Update: results computed for PDB ID: " + mysqlConnection.getPdbId() +"\" -t " + mysqlConnection.emailAddress + ",samuelfloresc@gmail.com -f sam@pe1.scilifelab.se ";
+               #ifdef SENDEMAIL
+               jobFile <<"printf \"" <<leafJobCompleteEmailContents <<"\" | "<<" /usr/bin/mail -s \"Update: results computed for PDB ID: "<< mysqlConnection.getPdbId()<< "\" "<< mysqlConnection.emailAddress << ",samuelfloresc@gmail.com \n";
+               #else
+               jobFile <<"# You have not defined the SENDEMAIL pragma, so no email will be sent.\n";
+               #endif
 
                 jobFile.flush();
 		jobFile.close();
@@ -219,11 +221,12 @@ This result has been added to the synopsis table. If the calculation has been do
                     //+ jobFileName;
                     std::string("sbatch ") + jobFileName; // prepend "sbatch", run in slurm.
 		#else
+		mySystemCall("chmod +x "+jobFileName);    
 		submitJobString= std::string("") + jobFileName; // prepend nothing, just run in foreground.
 		#endif
                 int systemCallReturnValue = -11111;
                 std::cout<<__FILE__<<":"<<__LINE__<<" issuing system call : >"<<submitJobString<<"< "<<std::endl; 
-		systemCallReturnValue = system(submitJobString.c_str());	
+		systemCallReturnValue = mySystemCall(submitJobString.c_str());	
                 std::cout<<__FILE__<<":"<<__LINE__<<" Command returned : >"<<systemCallReturnValue<<"< "<<std::endl;
 
                 if(st.st_size == 0)                      { std::cout<<__FILE__<<":"<<__LINE__<<" File  "<<jobFileName<<" is of size "<<st.st_size<<" . Exiting now. "<<std::endl;
