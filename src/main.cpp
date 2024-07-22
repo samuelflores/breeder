@@ -7,7 +7,6 @@
 #include "BreederParameterReader.h"
 #include <iostream>
 #include "ResidueStretchContainer.h"
-//#include "/home/samuelf/svn/RNAToolbox/trunk/include/ResidueStretchContainer.h"
 
 
 

@@ -14,7 +14,6 @@
 #define BreederParameterReader_H
 
 
-//#include "/home/samuelf/svn/RNAToolbox/trunk/include/ResidueStretchContainer.h"
 
 
 
