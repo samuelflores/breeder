@@ -193,7 +193,9 @@ class DBManager {
 		std::string getRenumberedWildTypeStructureFileName ();
 		std::string getFoldXRunFileName ();
 		std::string getSingleMutantFilesDirectory();
-		void setSingleMutantFilesDirectory(std::string mySingleMutantFilesDirectory ) {singleMutantFilesDirectory = mySingleMutantFilesDirectory;};
+		void setSingleMutantFilesDirectory(std::string mySingleMutantFilesDirectory ) {
+	            std::cout<<__FILE__<<":"<<__LINE__<<" Setting  singleMutantFilesDirectory = "<<mySingleMutantFilesDirectory<<std::endl;
+	            singleMutantFilesDirectory = mySingleMutantFilesDirectory;};
 		void setBreederMainDirectory(std::string myBreederMainDirectory ) {  breederMainDirectory = myBreederMainDirectory ;};
 		std::string  getBreederMainDirectory( ) {  return breederMainDirectory ;};
 		std::string getWorkingDirectory();
