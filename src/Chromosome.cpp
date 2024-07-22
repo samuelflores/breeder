@@ -385,10 +385,16 @@
 		std::string singleMutantFiles = mysqlConnection.getSingleMutantFilesDirectory(); //"/bubo/home/h17/samuelf/svn/breeder/singleMutantFiles";
                 std::cout<<__FILE__<<":"<<__LINE__<<" retrieved singleMutantFiles = "<<singleMutantFiles<<std::endl;
 		std::ifstream testFileStream(mysqlConnection.getRenumberedWildTypeStructureFileName().c_str());
-		if (!(testFileStream.good())) {std::cout<<__FILE__<<":"<<__LINE__<<" Could not open "<<mysqlConnection.getRenumberedWildTypeStructureFileName()<<std::endl; exit(1); }
+                std::cout<<__FILE__<<":"<<__LINE__<<" testFileStream.good() returns "<<testFileStream.good()<<std::endl;
+		if (!(testFileStream.good())) {
+		    std::cout<<__FILE__<<":"<<__LINE__<<" Could not open "<<mysqlConnection.getRenumberedWildTypeStructureFileName()<<std::endl; exit(1); 
+		}
 		testFileStream.close();
 
                 //mmbCopyFile(mysqlConnection.getRenumberedWildTypeStructureFileName(),string(singleMutantDirectory + "/raw.pdb"));
+                std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<std::endl;
+		checkOrCreateDirectory(singleMutantDirectory);
+                std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<std::endl;
                 mmbCopyFile(mysqlConnection.getRenumberedWildTypeStructureFileName(),string(singleMutantDirectory + "/raw.pdb"));
                
 
