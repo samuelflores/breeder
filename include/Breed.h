@@ -17,6 +17,10 @@
 
 #ifndef Breed_H
 #define Breed_H
+// If you want to use SLURM to run jobs, then #define SLURM . This affects the behavior of std::string runJobString(std::string mySingleMutantID,std::string myWorkingDirectory,  std::string mySingleMutantDirectory,  bool computeIndividualWildType, DBManager & mysqlConnection), see Breed.cpp
+#define SLURM
+// For bioinfo1, I will undefine it, so it simply runs in the foreground:
+#undef SLURM
 
 	enum ListTypeEnum {
 		sequencesString,// The user will provide a list of mutant sequences.  We are not using this much anymore.
