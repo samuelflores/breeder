@@ -211,7 +211,8 @@
                 runJobStringStream<<myMMBExecutable<<" -c "<<mySingleMutantDirectory <<"/commands.dat > "<<mySingleMutantDirectory<<"/mmb.out ;"<<std::endl;
                 std::cout<<__FILE__<<":"<<__LINE__<<std::endl;
                 runJobStringStream<<"# "<<__FILE__<<":"<<__LINE__<<std::endl;
-                runJobStringStream<<               myFoldXScript<<" "<< myWorkingDirectory  <<" " <<  mySingleMutantID <<" "<< myJobID<<" "<< computeIndividualWildType<< " "<<myFoldXExecutable  << " "<< mySQLExecutableAndParameters<<" "<<myChainsInMutatedSubunit<<" "<< myLastStage  << " "<< getPdbId() <<" "<< getTemperatureInK() << " &> "<<mySingleMutantDirectory<<"/run-foldx.out; "<<std::endl;//  ; " <<std::endl;
+                runJobStringStream<<               myFoldXScript<<" -mainDirectory "<< myWorkingDirectory  <<" -mutationString  " <<  mySingleMutantID <<" -jobName  "<< myJobID<<" -computeIndividualWildType  "<< computeIndividualWildType<< " -foldxExecutable  "<<myFoldXExecutable  << " -SQLExecuteString  "<< mySQLExecutableAndParameters<<" -chainsInMutatedSubunit  "<<myChainsInMutatedSubunit<<" -myLastStage "<< myLastStage  << " -myPdbId "<< getPdbId() <<" -temperature  "<< getTemperatureInK() << " &> "<<mySingleMutantDirectory<<"/run-foldx.out; "<<std::endl;//  ; " <<std::endl;
+                // old way: //runJobStringStream<<               myFoldXScript<<" "<< myWorkingDirectory  <<" " <<  mySingleMutantID <<" "<< myJobID<<" "<< computeIndividualWildType<< " "<<myFoldXExecutable  << " "<< mySQLExecutableAndParameters<<" "<<myChainsInMutatedSubunit<<" "<< myLastStage  << " "<< getPdbId() <<" "<< getTemperatureInK() << " &> "<<mySingleMutantDirectory<<"/run-foldx.out; "<<std::endl;//  ; " <<std::endl;
                 std::cout<<__FILE__<<":"<<__LINE__<<std::endl;
                 runJobStringStream<<"# "<<__FILE__<<":"<<__LINE__<<std::endl;
                 // can put this back later after we verify all is OK :
