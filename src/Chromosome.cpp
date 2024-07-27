@@ -331,42 +331,70 @@
                 //std::string singleMutantDirectory = workingDirectory + "/" + chromosome.getSingleMutantID() + "/"  ;
 
                 std::cout<<__FILE__<<":"<<__LINE__<<" mutationString = "<<getMutationString()<<std::endl;
-                        
+		checkOrCreateDirectory(workingDirectory);
+                /*        
                 struct stat st;
+                if (stat(workingDirectory.c_str(), &st) != 0) { // calling this stat constructor tells stat which path we are using.
+                    std::cout<<__FILE__<<":"<<__LINE__<<" stat failed! "<<std::endl;
+                    exit(1);          
+                } 
+                std::cout<<__FILE__<<":"<<__LINE__<<" Checking directory "<<workingDirectory<<" ... st.st_mode = " << st.st_mode << " S_IFDIR = "<< S_IFDIR<< " "<<std::endl;
+		if (S_IFDIR == 16384){
+		    std::cout<<__FILE__<<":"<<__LINE__<<"  S_IFDIR = "<< S_IFDIR << " equals 16384, or 40000 in octal. So it is a directory as we require."<<std::endl;
+		} else if (S_IFDIR == -1){
+		    std::cout<<__FILE__<<":"<<__LINE__<<"  S_IFDIR = "<< S_IFDIR << " indicating it does not exist. We will create it now."<<std::endl;   
+		    myMkdir(workingDirectory);	
+		} else {
+		    std::cout<<__FILE__<<":"<<__LINE__<<"  S_IFDIR = "<< S_IFDIR << " indicates a problem, we were expecting a directory here."<<std::endl;   
+		    exit(1);
+		}
+                std::cout<<__FILE__<<":"<<__LINE__<<" Comparing the path owner st_uid (user id) of "<<st.st_uid<<" with process uid of "<<geteuid()<<std::endl;
+		if (st.st_uid == geteuid()){
+                    std::cout<<__FILE__<<":"<<__LINE__<<" Path owner matches process uid. All good."<<std::endl;
+		} else {
+                    std::cout<<__FILE__<<":"<<__LINE__<<" Path owner does NOT match process uid. Exiting now.  "<<std::endl; exit(1);
+		}
+		mode_t permissions = st.st_mode & 0700; // leading 0 means this is octal number
+                std::cout<<__FILE__<<":"<<__LINE__<<" Masking all but the owner digit tells us the path has permissions : "<< std::oct <<permissions << std::dec        <<std::endl; // set back to decimal later to avoid confusion.
+		if (permissions == 0700){ 
+                    std::cout<<__FILE__<<":"<<__LINE__<<" Evidently we have rwx permissions. All is good"<<std::endl; 
+		} else {
+                    std::cout<<__FILE__<<":"<<__LINE__<<" Evidently we do NOT have rwx permissions. Exiting now."<<std::endl; exit(1);
+		}
+		*/
+		/*
                 if(stat(workingDirectory.c_str() ,&st) == 0) {
+                    std::cout<<__FILE__<<":"<<__LINE__<<" Checking directory "<<workingDirectory<<" ... st.st_mode = " << st.st_mode << " S_IFDIR = "<< S_IFDIR<< " "<<std::endl;
                     if(st.st_mode & S_IFDIR != 0) {
                         std::cout<<__FILE__<<":"<<__LINE__<<" Checking directory "<<workingDirectory<<" ... success!"<<std::endl;
                     }else {
-                        
                         std::cout<<__FILE__<<":"<<__LINE__<<" Unable to find directory "<<workingDirectory<<" .. an unknown error ocurred"<<std::endl; exit(1);
                     }
-                } else {
-                        /*
-			std::string makeWorkingDirectoryCommand = (std::string("mkdir ") + workingDirectory );
-			std::cout<<__FILE__<<":"<<__LINE__<<" About to issue mkdir command : "<<makeWorkingDirectoryCommand<<std::endl;
-			system(makeWorkingDirectoryCommand.c_str());
-                        std::cout<<__FILE__<<":"<<__LINE__<<" Just created directory "<<workingDirectory<<" .. presumably for first time use"<<std::endl; 
-                        */
+                } else 
+		{
                         std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<std::endl;
                         myMkdir(workingDirectory);
                         std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<std::endl;
-                }
+                }*/
 
-                /*std::string makeDirectoryCommand = (std::string("mkdir ") + singleMutantDirectory);
-                std::cout<<__FILE__<<":"<<__LINE__<<" About to issue mkdir command : "<<makeDirectoryCommand<<std::endl;
-                system(makeDirectoryCommand.c_str()); */
                 std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<std::endl;
-                myMkdir(singleMutantDirectory);
+                //myMkdir(singleMutantDirectory);
                 std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<std::endl;
                 //exit(1);
 		std::string    runCommand = "";
 		std::string singleMutantFiles = mysqlConnection.getSingleMutantFilesDirectory(); //"/bubo/home/h17/samuelf/svn/breeder/singleMutantFiles";
                 std::cout<<__FILE__<<":"<<__LINE__<<" retrieved singleMutantFiles = "<<singleMutantFiles<<std::endl;
 		std::ifstream testFileStream(mysqlConnection.getRenumberedWildTypeStructureFileName().c_str());
-		if (!(testFileStream.good())) {std::cout<<__FILE__<<":"<<__LINE__<<" Could not open "<<mysqlConnection.getRenumberedWildTypeStructureFileName()<<std::endl; exit(1); }
+                std::cout<<__FILE__<<":"<<__LINE__<<" testFileStream.good() returns "<<testFileStream.good()<<std::endl;
+		if (!(testFileStream.good())) {
+		    std::cout<<__FILE__<<":"<<__LINE__<<" Could not open "<<mysqlConnection.getRenumberedWildTypeStructureFileName()<<std::endl; exit(1); 
+		}
 		testFileStream.close();
 
                 //mmbCopyFile(mysqlConnection.getRenumberedWildTypeStructureFileName(),string(singleMutantDirectory + "/raw.pdb"));
+                std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<std::endl;
+		checkOrCreateDirectory(singleMutantDirectory);
+                std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<":"<<std::endl;
                 mmbCopyFile(mysqlConnection.getRenumberedWildTypeStructureFileName(),string(singleMutantDirectory + "/raw.pdb"));
                
 
