@@ -33,8 +33,10 @@
 		}
                 // SCF added 26 June 2014:
                 //mysqlConnection.insertUpdateDelete("update results set wildTypeString = \'" + wildTypeEquivalentChromosome->getSingleMutantID() + "\' where mutationString = \'" + chromosome->getSingleMutantID() + "\' and jobName = \'" + mysqlConnection.getJobID() + "\' ;"); // Useful to have later, when generating MultiScanning plots.
-                mysqlConnection.insertUpdateDelete("update results set wildTypeString = \'" + wildTypeEquivalentChromosome->getSingleMutantID() + "\' where mutationString = \'" + chromosome->getSingleMutantID() + "\' and " + mysqlConnection.jobIDAndPdbIdSelectionString() +  " ;");
-                mysqlConnection.setComplexStringInResultsTable(chromosome->getSingleMutantID()); // This sets the complexString in the results table, using the mutationString = chromosome->getSingleMutantID() .
+                mysqlConnection.insertUpdateDelete("update results set wildTypeString = \'" + wildTypeEquivalentChromosome->getSingleMutantID() + "\' where " +   mysqlConnection.resultsSelectionString(  chromosome->getSingleMutantID()) +  " ;"); // + "\' and " + mysqlConnection.jobIDAndPdbIdSelectionString() +  " ;");
+                //mysqlConnection.insertUpdateDelete("update results set wildTypeString = \'" + wildTypeEquivalentChromosome->getSingleMutantID() + "\' where mutationString = \'" + chromosome->getSingleMutantID() + "\' and " + mysqlConnection.jobIDAndPdbIdSelectionString() +  " ;");
+		//This is no longer needed, complexString is set early in job spawn:
+                //mysqlConnection.setComplexStringInResultsTable(chromosome->getSingleMutantID()); // This sets the complexString in the results table, using the mutationString = chromosome->getSingleMutantID() .
 		std::cout<<__FILE__<<":"<<__LINE__<<std::endl; 
                 // Here we create the job file and set SLURM parameters. However all the brainy work is done in runJobString in MysqlConnection.cpp
 		std::string jobFileName = singleMutantDirectory + std::string("/job.") + chromosome->getSingleMutantID();
@@ -94,8 +96,8 @@
                         if (myJobLibraryPath.length() > 0) {
 			    jobFile<<"export LD_LIBRARY_PATH="<<myJobLibraryPath<<"\n";   // Only write this line if jobInfo table entry "jobLibraryPath"" is of nonzero length
                         }
-                        //jobFile <<"echo \"update results set startTime = NOW() where jobName = \\\""<< mysqlConnection.getJobID()  <<"\\\" and mutationString = \\\""<< chromosome->getMutationString()  <<"\\\" ; \" | "<<mySQLExecutableAndParameters<<" ; " <<std::endl; 
-                        jobFile <<"echo \"update results set startTime = NOW() where jobName = \\\""<< mysqlConnection.getJobID()  <<"\\\" and pdbId = \\\""<< mysqlConnection.getPdbId() <<"\\\"  and mutationString = \\\""<< chromosome->getMutationString()  <<"\\\" ; \" | "<<mySQLExecutableAndParameters<<" ; " <<std::endl;
+                        jobFile <<"echo \"update results set startTime = NOW() where jobName = \\\""<< mysqlConnection.getJobID()  <<"\\\" and pdbId = \\\""<< mysqlConnection.getPdbId() <<"\\\"  and mutationString = \\\""<< chromosome->getMutationString()  <<"\\\"   and complexString = \\\"" << mysqlConnection.getChainsInMutatedSubunit( ) <<"\\\"  ; \" | "<<mySQLExecutableAndParameters<<" ; " <<std::endl;
+                        //jobFile <<"echo \"update results set startTime = NOW() where jobName = \\\""<< mysqlConnection.getJobID()  <<"\\\" and pdbId = \\\""<< mysqlConnection.getPdbId() <<"\\\"  and mutationString = \\\""<< chromosome->getMutationString()  <<"\\\" ; \" | "<<mySQLExecutableAndParameters<<" ; " <<std::endl;
                         jobFile<<"# End part that is written in "<<__FILE__<<":"<<__LINE__<<"\n"<<std::endl;
                 } else {
 			std::cout<<__FILE__<<":"<<__LINE__<<" Unable to write to "<<jobFileName<<std::endl; exit(1);
@@ -294,13 +296,11 @@ This result has been added to the synopsis table. If the calculation has been do
         int Breed::getNumMutantsInDatabase (const std::string myMutationString, DBManager & mysqlConnection) {
 	    std::cout<<__FILE__<<":"<<__LINE__<<" Looking for any existing "<< myMutationString<< " mutants with jobID "<<mysqlConnection.getJobID()<<std::endl;
 	    int identicalMutantsInDatabase ;
-	    std::string numMutantsQuery = " select count(*) from results where mutationString = \"";
-	    numMutantsQuery +=  myMutationString;
-	    numMutantsQuery += "\" and "; //jobName = \"";
-            numMutantsQuery += mysqlConnection.jobIDAndPdbIdSelectionString();
-	    //numMutantsQuery += mysqlConnection.getJobID();
-	    //numMutantsQuery += "\" and pdbId = \'";
-            //numMutantsQuery += mysqlConnection.getPdbId(); 
+	    std::string numMutantsQuery = " select count(*) from results where "; // mutationString = \"";
+	    //numMutantsQuery +=  myMutationString;
+	    //numMutantsQuery += "\" and "; //jobName = \"";
+            //numMutantsQuery += mysqlConnection.jobIDAndPdbIdSelectionString();
+	    numMutantsQuery += mysqlConnection.resultsSelectionString(myMutationString);
             numMutantsQuery += " ; ";
 	    identicalMutantsInDatabase = mysqlConnection.queryValueAsInt(numMutantsQuery.c_str() );
 	    return identicalMutantsInDatabase;
@@ -327,7 +327,9 @@ This result has been added to the synopsis table. If the calculation has been do
 			numSequencesQuery += "\" and mutationString = \"";
 			numSequencesQuery += myChromosome.getMutationString();
 			numSequencesQuery += "\" and "; //jobName = \"";
-                        numSequencesQuery += mysqlConnection.jobIDAndPdbIdSelectionString(); 
+                        //numSequencesQuery += mysqlConnection.resultsSelectionString(myChromosome.getMutationString() ); 
+                        numSequencesQuery += " jobName = \"" + mysqlConnection.getJobID() + "\" and pdbId = \'" + mysqlConnection.getPdbId()  + "\' " ;// mysqlConnection.jobIDAndPdbIdSelectionString(); 
+                        //numSequencesQuery += mysqlConnection.jobIDAndPdbIdSelectionString(); 
 			//numSequencesQuery += mysqlConnection.getJobID();
 			numSequencesQuery += "; ";
 			identicalSequencesInDatabase = mysqlConnection.queryValueAsInt(numSequencesQuery.c_str() );
@@ -490,7 +492,8 @@ This result has been added to the synopsis table. If the calculation has been do
 		// SCF put this here, so any old entries get updated. 19 Nov 2014
 		Chromosome wildTypeChromosome = *newChromosome;
 		wildTypeChromosome.revertToWildTypeEquivalent();
-		std::string wildTypeStringQuery = "update results set wildTypeString = \'" + wildTypeChromosome. getSingleMutantID() + "\' where mutationString = \'" + newChromosome->getSingleMutantID() + "\' and  " + mysqlConnection.jobIDAndPdbIdSelectionString() + " ;";
+		std::string wildTypeStringQuery = "update results set wildTypeString = \'" + wildTypeChromosome. getSingleMutantID() + "\' where " + mysqlConnection.resultsSelectionString(newChromosome->getSingleMutantID()) + " ;";
+			//mutationString = \'" + newChromosome->getSingleMutantID() + "\' and  " + mysqlConnection.jobIDAndPdbIdSelectionString() + " ;";
 		std::cout<<__FILE__<<":"<<__LINE__<<" About to issue : "<<wildTypeStringQuery<<std::endl;
 		mysqlConnection.insertUpdateDelete(wildTypeStringQuery);
  

@@ -591,7 +591,7 @@
        //insertUpdateDelete(updateComplexStringInResultsQuery);        
    };
 
-   void DBManager::setComplexStringInResultsTable( const std::string myMMBFormattedMutationString) {
+   /*void DBManager::setComplexStringInResultsTable( const std::string myMMBFormattedMutationString) {
        std::string condition = " where  "+ jobIDAndPdbIdSelectionString() + " and mutationString = \"" + myMMBFormattedMutationString + "\";";
        std::string updateComplexStringInResultsQuery = std::string("update results set complexString = \"" + getChainsInMutatedSubunit() + "\"" + condition); //"\" where  "+ jobIDAndPdbIdSelectionString() + " and mutationString = \"" +  myMMBFormattedMutationString + "\";" ) ;
        insertUpdateDelete(updateComplexStringInResultsQuery);        
@@ -604,7 +604,7 @@
        } 
        else { std::cout << __FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" Got : >" + myCheck + "<" <<std::endl;
           std::cout << __FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" We expected : >" << getChainsInMutatedSubunit()  <<"< "<<std::endl;}
-   };
+   };*/
 
    std::string DBManager::getChainsInMutatedSubunit(){
        //std::string myQueryString = "select complexString from results where "+ jobIDAndPdbIdSelectionString() + " and mutationString = \"" +  breederFormattedMutationString + "\";"  ;
@@ -1213,19 +1213,15 @@ std::string DBManager::getPdbNumberedWildTypeStructureFileName () {
         //    return " jobName = \"" + getJobID() + "\" and pdbId = \'" + getPdbId()  + "\' ";
         //}  
 	int DBManager::getNumJobs(std::string status,std::string mutationString) {
-                //std::string statusJobCountFile = "/bubo/home/h17/samuelf/jobCount.txt";
 		std::string queryString ="";
                 queryString += " select count(*) from results where status like \'";
                 queryString += status;
 		queryString += "\'  and ";
-                queryString += jobIDAndPdbIdSelectionString(); 
-		//queryString += " and jobName = \'";
-		//queryString += getJobID();      
-		//queryString += "\' and pdbId = \'" ;
-                //queryString += getPdbId();
-		queryString += " and mutationString = \'" ;
-                queryString += mutationString;
-                queryString += "\' ;  "; 
+                queryString += resultsSelectionString(mutationString); 
+		//queryString += " and mutationString = \'" ;
+                //queryString += mutationString;
+                queryString += " ; "; 
+                //"xyqueryString += "\' ;  "; 
                 std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" About to submit query : "<<queryString<< std::endl;              
                 std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" Note the use of 'status like ' .. this is a bit dangerous because certain characters could be interpreted as wildcards."<< std::endl; 
 		return queryValueAsInt(queryString);
@@ -1239,14 +1235,14 @@ std::string DBManager::getPdbNumberedWildTypeStructureFileName () {
 		std::string retrievedSequence;
 		double retrievedSequenceFoldxEnergy;
 		do     {
-				retrievedSequence = queryValueAsString ("  select sequence from results where " + jobIDAndPdbIdSelectionString()  + " and not ISNULL(foldx_energy) order by RAND() limit 1 ; ");
- 			std::string retrievedSequenceFoldxEnergyQuery = std::string("  select (foldx_energy - foldx_energy_wild_type) from results where ") + jobIDAndPdbIdSelectionString() + std::string(" and sequence = \"") + retrievedSequence + std::string("\" ; ") ;
+			retrievedSequence = queryValueAsString (std::string("  select sequence from results where jobName = \"") + std::string(getJobID()) + std::string("\" and pdbId = \"") + std::string(getPdbId())  + std::string("\" and not ISNULL(foldx_energy) order by RAND() limit 1 ; "));
+ 			std::string retrievedSequenceFoldxEnergyQuery = std::string("  select (foldx_energy - foldx_energy_wild_type) from results where ") + " jobName = \"" + getJobID() + "\" and pdbId = \'" + getPdbId()  + "\' "  + std::string(" and sequence = \"") + retrievedSequence + std::string("\" ; ") ;
 		 	retrievedSequenceFoldxEnergy = (queryValueAsDouble(retrievedSequenceFoldxEnergyQuery));
  		} while (!acceptanceTest (retrievedSequenceFoldxEnergy)); // as soon as we pass acceptanceTest, we can break out of the loop.
                 std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" Having found an acceptable sequence : "<<retrievedSequence<<", we are moving on .."<<std::endl;
 		return retrievedSequence;
         };
-        std::string DBManager::getFoldxWildTypeEnergyBaseQuery(std::string wildTypeMutationString){ return  " from results where wildTypeString = \"" + wildTypeMutationString + "\" and " + DBManager::jobIDAndPdbIdSelectionString()  + " and not ISNULL(foldx_energy_wild_type)  ";}   
+        std::string DBManager::getFoldxWildTypeEnergyBaseQuery(std::string wildTypeMutationString){ return  " from results where wildTypeString = \"" + wildTypeMutationString + "\" and " + " jobName = \"" + getJobID() + "\" and pdbId = \'" + getPdbId()  + "\' "  + " and not ISNULL(foldx_energy_wild_type)  ";}   
         double DBManager::getFoldxWildTypeEnergy(std::string wildTypeMutationString){ 
                     //std::string baseQuery =  " from results where wildTypeString = \"" + wildTypeMutationString + "\" and " + jobIDAndPdbIdSelectionString()  + " and not ISNULL(foldx_energy_wild_type)  ";
                     std::string countQuery =  "select count(*) " + getFoldxWildTypeEnergyBaseQuery( wildTypeMutationString) + " limit 1; ";

@@ -120,7 +120,7 @@ class DBManager {
                 //void setWildTypeStructureFileName(const std::string wtStructureFileName); // Set the path and file name of the structure file. Validates to make sure owner has read access.
                 void setPartition       (const std::string myPartition       );
                 void setChainsInMutatedSubunit       (const std::string  myChainsInMutatedSubunit       );
-                void setComplexStringInResultsTable( const std::string myMMBFormattedMutationString);
+                //void setComplexStringInResultsTable( const std::string myMMBFormattedMutationString); // no longer needed, complexString is set early in the job spawn process
                 void setNumReportingIntervals        (const int    );
                 void setReportingInterval            (const double );
                 void setFlexibilityWindowOffset(const int myFlexibilityWindowOffset);
@@ -237,9 +237,11 @@ class DBManager {
 	            std::cout<<__FILE__<<":"<< __LINE__ <<" getGromacsSimulationTime()  = "<<getGromacsSimulationTime() <<std::endl;
                     return (getGromacsSimulationTime() > 1E-14); // May need a more sophisticated criterion .. let's see how things go. 
                 };
-                std::string jobIDAndPdbIdSelectionString(){
-                    return " jobName = \"" + getJobID() + "\" and pdbId = \'" + getPdbId()  + "\' ";
-                }
+                //std::string jobIDAndPdbIdSelectionString(){
+	        //    exit(1);
+                //    return " jobName = \"" + getJobID() + "\" and pdbId = \'" + getPdbId()  + "\' ";
+                //}
+                std::string resultsSelectionString( const std::string myMutationString){return " jobName = \'" + getJobID() + "\' and pdbId = \'" + getPdbId()  + "\'  and mutationString = \'" +  myMutationString  + "\' and complexString = \'" + getChainsInMutatedSubunit() + "\' " ; }
                 std::string getFoldxWildTypeEnergyBaseQuery(std::string wildTypeMutationString);
                 double getFoldxWildTypeEnergy( std::string wildTypeMutationString); 
                 bool shouldRunZEMuForJobWildType(std::string mutationString, std::string wildTypeMutationString);
