@@ -11,7 +11,8 @@ print "syntax ./run-foldx.pl  <main directory>  <mutation string C:RRR:M where C
 #//if (($ARGV[22] eq "")) {
 #//	print "Not enough parameters provided!\n";
 #//	exit (1);}
-
+$complexString = "NOT-SET";
+$temperature = -11111.11111;
 $i = 0;
 while ($i < 21){
     print "Processing arguments ",$ARGV[$i]," , ", $ARGV[$i+1],"\n";	
@@ -39,8 +40,8 @@ while ($i < 21){
         # to compensate for the fact that this is actually two arguments, e.g. -SQLExecuteString  /usr/bin/mysql --defaults-extra-file=/home/samuel.flores/github/breeder/singleMutantFiles/option-file.mysql 	
         print " to ", $i,"\n";
     }
-    elsif ($ARGV[$i] eq "-chainsInMutatedSubunit") {
-        $chainsInMutatedSubunit= $ARGV[$i+1]	    
+    elsif ($ARGV[$i] eq "-complexString") {
+        $complexString= $ARGV[$i+1]	    
     }
     elsif ($ARGV[$i] eq "-myLastStage") {
         $myLastStage= $ARGV[$i+1]	    
@@ -49,11 +50,16 @@ while ($i < 21){
         $myPdbId= $ARGV[$i+1]	    
     }
     elsif ($ARGV[$i] eq "-temperature") {
-        $temperature= $ARGV[$i+1]	    
+        $temperature= $ARGV[$i+1];    
+        print "temperature just set to $temperature\n";
     }
-    elsif ($ARGV[$i] eq "-computeIndividualWildType") {
-        $computeIndividualWildType= $ARGV[$i+1]	    
-    } elsif ($ARGV[$i] eq "") {
+    //elsif ($ARGV[$i] eq "-computeIndividualWildType") {
+    //    $computeIndividualWildType= $ARGV[$i+1]	    
+    //}	
+    //elsif ($ARGV[$i] eq "-complexString") {
+    //    $complexString = $ARGV[$i+1]	    
+    //} 
+    elsif ($ARGV[$i] eq "") {
 	print "Not enough parameters provided!\n";
 	exit (1);
     }
@@ -77,8 +83,8 @@ print "foldxExecutable set to $foldxExecutable\n";
 #$SQLExecuteString =  "$ARGV[5]   $ARGV[6] ";
 print "SQLExecuteString set to $SQLExecuteString\n";
 #print "SQLExecuteString = $SQLExecuteString \n";
-#$chainsInMutatedSubunit = $ARGV[ 7];
-print "chainsInMutatedSubunit set to $chainsInMutatedSubunit\n";
+#$complexString = $ARGV[ 7];
+print "complexString set to $complexString\n";
 #$myLastStage = $ARGV[ 8];
 print "myLastStage set to $myLastStage\n";
 #$myPdbId = $ARGV[ 9];
@@ -100,6 +106,13 @@ if ($computeIndividualWildType){
  	$correspondingMutant = fileparse($mainDirectory);
 print "the corresponding mutant to the wildtype $mutationString is $correspondingMutant \n";
 }
+if ($complexString eq "NOT-SET"){
+    print "run-foldx : -complexString set to ",$complexString,". Exiting now. \n"; 
+    exit(1);
+} else {
+    print "run-foldx : -complexString set to ",$complexString,". \n";
+}    
+
 # not needed. we are now doing the C to X substitution in MMB. I believe 'sed' command was not understood, probably needs full path.
 #system("cd $singleMutantDirectory; sed s/CYX/CYS/ last.2.pdb > temp.pdb; echo 'temp.pdb' > batch.txt");
 # Turns out this is still needed. We need to translate back to CYS so FoldX understands:
@@ -116,7 +129,7 @@ system($cyxToCysCommand);
 # The "$foldxExecutable --command=RepairPDB --pdb=last.".$myLastStage.".pdb --repair_Interface=ALL" command outputs last_Repair.pdb .
 # The "$foldxExecutable --command=Optimize --pdb=last_Repair.pdb" outputs Optimized_last_Repair.pdb .
 # I couldn't get it to include $myLastStage as part of the file name because of the '.' .
-#$runFoldXCommand = "cd $singleMutantDirectory; $foldxExecutable --command=RepairPDB --pdb=last.".$myLastStage.".pdb --repair_Interface=ALL > $singleMutantDirectory/foldx.$mutationString.out ; $foldxExecutable --command=Optimize --pdb=last_Repair.pdb >> $singleMutantDirectory/foldx.$mutationString.out ; $foldxExecutable --command=AnalyseComplex --pdb=Optimized_last_Repair.pdb --analyseComplexChains=$chainsInMutatedSubunit >> $singleMutantDirectory/foldx.$mutationString.out ";
+#$runFoldXCommand = "cd $singleMutantDirectory; $foldxExecutable --command=RepairPDB --pdb=last.".$myLastStage.".pdb --repair_Interface=ALL > $singleMutantDirectory/foldx.$mutationString.out ; $foldxExecutable --command=Optimize --pdb=last_Repair.pdb >> $singleMutantDirectory/foldx.$mutationString.out ; $foldxExecutable --command=AnalyseComplex --pdb=Optimized_last_Repair.pdb --analyseComplexChains=$complexString >> $singleMutantDirectory/foldx.$mutationString.out ";
 #modified to use the cyxToCys PDB:
 # set to  --repair_Interface=ONLY and skipping Optimize:
 # Overrode a lot of recent changes to match SKEMPIMN-0ps :
@@ -124,7 +137,7 @@ system($cyxToCysCommand);
 print "############################\n";
 print "# Part 1 : Here we compute  DDG\n";
 print "############################\n";
-$runFoldXCommand = "cd $singleMutantDirectory; $foldxExecutable --command=AnalyseComplex --pdb=$cyxToCysPdb --analyseComplexChains=$chainsInMutatedSubunit  >> $singleMutantDirectory/foldx.$mutationString.out ";
+$runFoldXCommand = "cd $singleMutantDirectory; $foldxExecutable --command=AnalyseComplex --pdb=$cyxToCysPdb --analyseComplexChains=$complexString  >> $singleMutantDirectory/foldx.$mutationString.out ";
 print "About to issue runFoldXCommand = $runFoldXCommand \n";
 system($runFoldXCommand);
 print "done with runFoldXCommand  \n";
@@ -142,11 +155,11 @@ $year += 1900;
 $month += 1;
 if ($computeIndividualWildType){
 # Turns out on akka for some reason the &> redirect does not work. Leads instead to output being dumped to what looks like stdout (or maybe stderr). Using just > redirect instead.
-$mysqlString = "echo \"update results set foldx_energy_wild_type = $foldx_energy, status = \\\"WT completed\\\" , date = \\\"$year-$month-$day\\\"  where jobName = \\\"$jobName\\\" and pdbId =  \\\"$myPdbId\\\" and mutationString = \\\"$correspondingMutant\\\";\" | $SQLExecuteString  >  $singleMutantDirectory/$mutationString.mysql ";
+$mysqlString = "echo \"update results set foldx_energy_wild_type = $foldx_energy, status = \\\"WT completed\\\" , date = \\\"$year-$month-$day\\\"  where jobName = \\\"$jobName\\\" and pdbId =  \\\"$myPdbId\\\" and mutationString = \\\"$correspondingMutant\\\" and complexString  = \\\"$complexString\\\"    ;\" | $SQLExecuteString  >  $singleMutantDirectory/$mutationString.mysql ";
 }
 else{
 # Turns out on akka for some reason the &> redirect does not work. Leads instead to output being dumped to what looks like stdout (or maybe stderr). Using just > redirect instead.
-$mysqlString = "echo \"update results set foldx_energy = $foldx_energy, status = \\\"completed\\\" , date = \\\"$year-$month-$day\\\"  where jobName = \\\"$jobName\\\" and pdbId =  \\\"$myPdbId\\\"   and mutationString = \\\"$mutationString\\\";\" | $SQLExecuteString  &>  $singleMutantDirectory/$mutationString.mysql ";
+$mysqlString = "echo \"update results set foldx_energy = $foldx_energy, status = \\\"completed\\\" , date = \\\"$year-$month-$day\\\"  where jobName = \\\"$jobName\\\" and pdbId =  \\\"$myPdbId\\\"   and mutationString = \\\"$mutationString\\\" and complexString  = \\\"$complexString\\\" ;\" | $SQLExecuteString  &>  $singleMutantDirectory/$mutationString.mysql ";
 }
 print $mysqlString,"\n";
 system($mysqlString);
@@ -173,12 +186,13 @@ $year += 1900;
 $month += 1;
 if ($computeIndividualWildType){
 # Turns out on akka for some reason the &> redirect does not work. Leads instead to output being dumped to what looks like stdout (or maybe stderr). Using just > redirect instead.
-$mysqlString = "echo \"update results set foldx_stability_wild_type = $foldx_stability, status = \\\"WT completed\\\" , date = \\\"$year-$month-$day\\\"  where jobName = \\\"$jobName\\\" and pdbId =  \\\"$myPdbId\\\" and mutationString = \\\"$correspondingMutant\\\";\" | $SQLExecuteString  >  $singleMutantDirectory/$mutationString.mysql ";
+$mysqlString = "echo \"update results set foldx_stability_wild_type = $foldx_stability, status = \\\"WT completed\\\" , date = \\\"$year-$month-$day\\\"  where jobName = \\\"$jobName\\\" and pdbId =  \\\"$myPdbId\\\" and mutationString = \\\"$correspondingMutant\\\" and complexString  = \\\"$complexString\\\" ;\" | $SQLExecuteString  >  $singleMutantDirectory/$mutationString.mysql ";
 }
 else{
 # Turns out on akka for some reason the &> redirect does not work. Leads instead to output being dumped to what looks like stdout (or maybe stderr). Using just > redirect instead.
-$mysqlString = "echo \"update results set foldx_stability = $foldx_stability, status = \\\"completed\\\" , date = \\\"$year-$month-$day\\\"  where jobName = \\\"$jobName\\\" and pdbId =  \\\"$myPdbId\\\"   and mutationString = \\\"$mutationString\\\";\" | $SQLExecuteString  &>  $singleMutantDirectory/$mutationString.mysql ";
+$mysqlString = "echo \"update results set foldx_stability = $foldx_stability, status = \\\"completed\\\" , date = \\\"$year-$month-$day\\\"  where jobName = \\\"$jobName\\\" and pdbId =  \\\"$myPdbId\\\"   and mutationString = \\\"$mutationString\\\" and complexString  = \\\"$complexString\\\"  ;\" | $SQLExecuteString  &>  $singleMutantDirectory/$mutationString.mysql ";
 }
 print $mysqlString,"\n";
 system($mysqlString);
+print "Done with run-foldx script \n";
 
