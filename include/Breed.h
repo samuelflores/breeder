@@ -21,6 +21,8 @@
 #define SLURM
 // For bioinfo1, I will undefine it, so it simply runs in the foreground:
 #undef SLURM
+#define RERUNALWAYS
+#undef RERUNALWAYS // Turns out RERUNALWAYS does not work quite right.
 
 	enum ListTypeEnum {
 		sequencesString,// The user will provide a list of mutant sequences.  We are not using this much anymore.
