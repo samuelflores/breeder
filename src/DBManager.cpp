@@ -254,7 +254,7 @@
     }
 
     void DBManager::setSubmittedHomologs    (std::string pdbPrimary, std::string pdbHomolog , std::string complexPrimary, std::string complexHomolog, std::string mutationStringPrimary,  std::string mutationStringHomolog   ) {
-      // std::string myMatchingChainsSelectionString = matchingChainsSelectionString ( pdbPrimary, pdbHomolog , complexChainPrimary, complexChainHomolog );
+
       if (countEntriesInSubmittedHomologs(pdbPrimary, pdbHomolog , complexHomolog, mutationStringHomolog )){
           std::cout << __FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<std::endl; 
           std::string myQueryStringA = "select mutationStringPrimary from submittedHomologs " +  matchingSubmittedHomologsString ( pdbPrimary, pdbHomolog , complexHomolog, mutationStringHomolog );
@@ -318,7 +318,9 @@
       std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" checking column >"<<columnName<<"< "<<std::endl; 
       if (countEntriesInMatchingChains(pdbPrimary, pdbHomolog , chainPrimary, chainHomolog )){
           std::string myQueryString0 = "select isnull("+columnName+") from matchingChains " +  matchingChainsSelectionString ( pdbPrimary, pdbHomolog , chainPrimary,chainHomolog );
-          return queryValueAsInt   ( myQueryString0 );
+          bool returnValue =  queryValueAsInt     ( myQueryString0 );
+          std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" column >"<<columnName<<" returns isnull =  "<<returnValue <<std::endl;
+          return returnValue     ;
       } else {
           std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" There are no entries for this pdbHomolog, chainPrimary, and chainHomolog . Error!"<<std::endl; 
           exit (1); 
@@ -359,25 +361,6 @@
           exit (1); 
       }
     }
-    // Determine if the chainwise sequence identity is Null.
-    /*bool DBManager::chainSequenceAlignmentIsNull        (std::string pdbPrimary, std::string pdbHomolog , std::string chainPrimary, std::string chainHomolog, double sequenceIdentityCutoff){
-      std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" for primary pdbId : "<<pdbPrimary <<" , homolog pdb ID  >"<<pdbHomolog<<"< chainPrimary =  >"<<chainPrimary<<"< , chainHomolog =  >"<< chainHomolog <<"< .. determining whether sequence alignment is satisfactory.." <<std::endl; 
-      bool mySequenceIdentityIsNull = 0;
-      if (countEntriesInMatchingChains(pdbPrimary, pdbHomolog , chainPrimary, chainHomolog )){
-          bool   mySequenceIdentityIsNull = getMatchingChainsValueAsDoubleReturnsNull(pdbPrimary, pdbHomolog, chainPrimary, chainHomolog,"sequenceIdentity");
-      } 
-          if (mySequenceIdentity >= sequenceIdentityCutoff){
-               std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" sequence identity = "<<mySequenceIdentity<<", which is at or over the cutoff of "<<sequenceIdentityCutoff<<". This is satisfactory. Returning True."<<std::endl;   
-               return 1;
-          } else {
-               std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" sequence identity = "<<mySequenceIdentity<<", which is UNDER the cutoff of "<<sequenceIdentityCutoff<<". This is notsatisfactory. Returning False."<<std::endl;   
-               return 0;
-          }  
-      } else {
-          std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" There are no entries for this pdbHomolog, chainPrimary, and chainHomolog . Error!"<<std::endl; 
-          exit (1); 
-      }
-    }*/
 
     void DBManager::setLocalSequenceIdentity (std::string pdbPrimary, std::string pdbHomolog , std::string chainPrimary, std::string chainHomolog , std::string mutationString,double inclusionRadius, std::string columnName , double columnValue  ) {
           std::string myLocalRmsdSelectionString = localRmsdSelectionString( pdbPrimary, pdbHomolog , chainPrimary, chainHomolog , mutationString, inclusionRadius);
@@ -461,12 +444,8 @@
                  std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" "<<std::endl;
                 int myJobIDCount = countRmsdEntriesDirectly(pdbPrimary, pdbHomolog, complexChainPrimary, complexChainHomolog);
                 std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" "<<std::endl;
-                /*if (myJobIDCount > 0) {std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" An entry exists in rmsd table. Deleting that now."<<std::endl;
-                    std::string myQueryString2 = "delete from  rmsd      where pdbPrimary = '" + pdbPrimary + "'  AND pdbHomolog = '" + pdbHomolog + "' AND complexChainPrimary = '" + complexChainPrimary + "' AND complexChainHomolog = '" + complexChainHomolog + "' ; ";
-                    insertUpdateDelete(myQueryString2);
-                }
-                std::string myQueryString3 = std::string("insert into  rmsd      ( pdbPrimary , pdbHomolog , complexChainPrimary , complexChainHomolog, rmsd) VALUES ('") + pdbPrimary + "'  ,  '" +   pdbHomolog + "' ,  '" + complexChainPrimary + "' , '" + complexChainHomolog + "'  , " + std::to_string(myRmsd) + " ) ; ";
-                insertUpdateDelete(myQueryString3);*/
+
+
                 if (myJobIDCount > 1) {
 	            std::cout<<__FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" Counted "<<myJobIDCount<<" entres in rmsd table. Error!"<<std::endl; exit(1);
                 
@@ -541,28 +520,6 @@
                 //std::cout<<__FILE__<<":"<<__LINE__<<" Should not get to this point."<<std::endl;
                 //exit(1);                                    
 	        };
-   /*
-   void DBManager::setWildTypeStructureFileName(const std::string wtStructureFileName) {
-       std::cout << __FILE__<<":"<<__FUNCTION__<<":"<<__LINE__<<" Obsolete! Use the newer function, insertAlternateStructureFileNameIfAbsent instead."<<std::endl;
-       exit(1);
-	        validate();
-                struct stat st;
-                std::cout <<__FILE__<<":"<<__LINE__<< "Checking status of provided structure file, named >"<<wtStructureFileName <<"< : "<< stat(wtStructureFileName.c_str(),&st) << std::endl;
-                if (st.st_mode & S_IRUSR) {
-                    std::cout << " Owner appears to have write permissions on "<<wtStructureFileName <<"."<<std::endl;
-                } else {
-                    std::cout << " Owner does NOT appear to have read  permissions on input PDB structure file >"<<wtStructureFileName <<"<. Please confirm that the file exists and is accessible. If the file name is blank or has zero length, then you have not provided it. Please set the -WTSTRUCTUREFILENAME breeder command line argument, or the wtStructureFileName column in the jobInfo table."<<std::endl; exit(1);
-                }
-		    std::string myQueryString;
-		    myQueryString = std::string("update jobInfo set  wildTypeStructureFileName = \"") +wtStructureFileName +  std::string("\"   where runID = \"") + runID + std::string("\" limit 1;");
-                    std::cout <<__FILE__<<":"<<__LINE__<< "About to issue : "<< myQueryString  << std::endl;
-		    insertUpdateDelete (myQueryString);
-                    wildTypeStructureFileName = wtStructureFileName;
-                    if (getWildTypeStructureFileName() != wtStructureFileName) {
-                        std::cout <<__FILE__<<":"<<__LINE__<< " Error! getWildTypeStructureFileName() returned >"<< getWildTypeStructureFileName()   <<"< "<< std::endl;
-                        exit(1);
-                    }
-	        };*/
    void DBManager::setPartition       (const std::string myPartition       ) {
 	        validate();
 		std::string myQueryString;
